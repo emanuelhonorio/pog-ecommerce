@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.emanuelhonorio.pogecommerce.error.exceptions.OutOfStockException;
 import com.emanuelhonorio.pogecommerce.error.exceptions.ResourceAlreadyExistsException;
 import com.emanuelhonorio.pogecommerce.error.exceptions.ResourceNotFoundException;
+import com.emanuelhonorio.pogecommerce.error.exceptions.ResourceOwnerException;
 import com.emanuelhonorio.pogecommerce.error.response.ErrorResponse;
 
 @ControllerAdvice
@@ -26,50 +27,41 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex) {
-		ErrorResponse err = new ErrorResponse(404, ex.getMessage());
+		ErrorResponse err = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
 	}
-	
-	@ExceptionHandler(ResourceAlreadyExistsException.class)
-	public ResponseEntity<?> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
-		ErrorResponse err = new ErrorResponse(409, ex.getMessage());
+
+	@ExceptionHandler({ ConstraintViolationException.class, DataIntegrityViolationException.class,
+			ResourceAlreadyExistsException.class, OutOfStockException.class })
+	public ResponseEntity<?> handleDefaultConflictExceptions(Exception ex) {
+		ErrorResponse err = new ErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(err);
 	}
-	
-	@ExceptionHandler(OutOfStockException.class)
-	public ResponseEntity<?> handleOutOfStockException(OutOfStockException ex) {
-		ErrorResponse err = new ErrorResponse(409, ex.getMessage());
-		return ResponseEntity.ok().body(err);
+
+	@ExceptionHandler({ ResourceOwnerException.class })
+	public ResponseEntity<?> handleDefaultForbiddenExceptions(Exception ex) {
+		ErrorResponse err = new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(err);
 	}
-	
-	@ExceptionHandler({
-		ConstraintViolationException.class,
-		DataIntegrityViolationException.class,
-	})
-	public ResponseEntity<?> handleMySQLIntegrityConstraintViolationException(Exception ex) {
-		ErrorResponse err = new ErrorResponse(409, ex.getMessage());
-		return ResponseEntity.ok().body(err);
-	}
-	
+
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		ErrorResponse err = new ErrorResponse(409, "One or more fields are not valid");
 		err.setFieldErrors(getFielErrors(ex.getBindingResult()));
-		
+
 		return handleExceptionInternal(ex, err, headers, HttpStatus.BAD_REQUEST, request);
 	}
 
 	private Map<String, String> getFielErrors(BindingResult result) {
 		Map<String, String> errors = new HashMap<>();
 		result.getAllErrors().forEach((error) -> {
-	        String fieldName = ((FieldError) error).getField();
-	        String errorMessage = error.getDefaultMessage();
-	        errors.put(fieldName, errorMessage);
-	    });
-	    return errors;
+			String fieldName = ((FieldError) error).getField();
+			String errorMessage = error.getDefaultMessage();
+			errors.put(fieldName, errorMessage);
+		});
+		return errors;
 	}
 
-	
 }

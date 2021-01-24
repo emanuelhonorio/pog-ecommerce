@@ -10,14 +10,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import com.emanuelhonorio.pogecommerce.dto.CreateProdutoDTO;
 import com.emanuelhonorio.pogecommerce.error.exceptions.ResourceNotFoundException;
+import com.emanuelhonorio.pogecommerce.error.exceptions.ResourceOwnerException;
 import com.emanuelhonorio.pogecommerce.model.Categoria;
+import com.emanuelhonorio.pogecommerce.model.Endereco;
 import com.emanuelhonorio.pogecommerce.model.Foto;
 import com.emanuelhonorio.pogecommerce.model.Produto;
 import com.emanuelhonorio.pogecommerce.model.QProduto;
+import com.emanuelhonorio.pogecommerce.model.Usuario;
 import com.emanuelhonorio.pogecommerce.repository.FotoRepository;
 import com.emanuelhonorio.pogecommerce.repository.ProdutoRepository;
 import com.emanuelhonorio.pogecommerce.service.filter.ProdutoFilter;
@@ -69,15 +73,18 @@ public class ProdutoService {
 		return produtoRepository.findAll(booleanBuilder, PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
 	}
 
-	public Produto save(CreateProdutoDTO produtoDTO) {
+	public Produto save(Usuario usuario, CreateProdutoDTO produtoDTO) {
 		Produto newProduto = new Produto();
 
 		// if he wants to update
 		if (produtoDTO.getId() != null) {
 			newProduto = findByIdOrThrow(produtoDTO.getId());
+			
+			checkIfProductBelongsToUserOrThrow(newProduto, usuario);
 		}
 
 		newProduto.setId(produtoDTO.getId());
+		newProduto.setUsuario(usuario);
 		newProduto.setNome(produtoDTO.getNome());
 		newProduto.setDescricao(produtoDTO.getDescricao());
 		newProduto.setMarca(produtoDTO.getMarca());
@@ -108,5 +115,12 @@ public class ProdutoService {
 		fotoRepository.saveAll(fotos);
 		
 		return savedProduto;
+	}
+	
+	public void checkIfProductBelongsToUserOrThrow(Produto produto, Usuario usuario) {
+		Assert.notNull(produto.getUsuario().getId());
+		if (produto.getUsuario().getId() != usuario.getId()) {
+			throw new ResourceOwnerException("address doesn't belongs to user with id " + usuario.getId());
+		}
 	}
 }

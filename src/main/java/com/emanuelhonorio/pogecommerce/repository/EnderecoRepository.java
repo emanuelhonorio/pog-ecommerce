@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.emanuelhonorio.pogecommerce.model.Compra;
+import com.emanuelhonorio.pogecommerce.model.Endereco;
 import com.emanuelhonorio.pogecommerce.model.Usuario;
 
-public interface CompraRepository extends JpaRepository<Compra, Long> {
+public interface EnderecoRepository extends JpaRepository<Endereco, Long> {
 
-	List<Compra> findByUsuario(Usuario usuario);
+	List<Endereco> findByUsuario(Usuario usuario);
 }
