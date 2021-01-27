@@ -1,6 +1,8 @@
 package com.emanuelhonorio.pogecommerce.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,14 +12,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 import com.emanuelhonorio.pogecommerce.dto.CreateProdutoDTO;
 import com.emanuelhonorio.pogecommerce.error.exceptions.ResourceNotFoundException;
 import com.emanuelhonorio.pogecommerce.error.exceptions.ResourceOwnerException;
 import com.emanuelhonorio.pogecommerce.model.Categoria;
-import com.emanuelhonorio.pogecommerce.model.Endereco;
 import com.emanuelhonorio.pogecommerce.model.Foto;
 import com.emanuelhonorio.pogecommerce.model.Produto;
 import com.emanuelhonorio.pogecommerce.model.QProduto;
@@ -36,7 +36,7 @@ public class ProdutoService {
 
 	@Autowired
 	private CategoriaService categoriaService;
-	
+
 	@Autowired
 	private FotoRepository fotoRepository;
 
@@ -76,10 +76,10 @@ public class ProdutoService {
 	public Produto save(Usuario usuario, CreateProdutoDTO produtoDTO) {
 		Produto newProduto = new Produto();
 
-		// if he wants to update
-		if (produtoDTO.getId() != null) {
+		boolean isUpdating = produtoDTO.getId() != null;
+
+		if (isUpdating) {
 			newProduto = findByIdOrThrow(produtoDTO.getId());
-			
 			checkIfProductBelongsToUserOrThrow(newProduto, usuario);
 		}
 
@@ -100,25 +100,24 @@ public class ProdutoService {
 		});
 		newProduto.setCategorias(categorias);
 
-
 		// SAVE PRODUTO
 		Produto savedProduto = produtoRepository.save(newProduto);
-		
+
 		// set fotos (one to many relationship, so i need the id of the produto)
 		fotoRepository.deleteByProduto(savedProduto);
-		Set<Foto> fotos = new HashSet<>();
+		List<Foto> fotos = new ArrayList<>();
 		produtoDTO.getFotos().forEach(imageUrl -> {
 			Foto foto = new Foto(imageUrl);
 			foto.setProduto(savedProduto);
 			fotos.add(foto);
 		});
 		fotoRepository.saveAll(fotos);
-		
+
 		return savedProduto;
 	}
-	
+
 	public void checkIfProductBelongsToUserOrThrow(Produto produto, Usuario usuario) {
-		Assert.notNull(produto.getUsuario().getId());
+		// Assert.notNull(produto.getUsuario().getId());
 		if (produto.getUsuario().getId() != usuario.getId()) {
 			throw new ResourceOwnerException("address doesn't belongs to user with id " + usuario.getId());
 		}

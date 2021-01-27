@@ -6,7 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,6 +20,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import com.emanuelhonorio.pogecommerce.model.enums.StatusCompra;
 
 @Entity
 @Table(name = "compras")
@@ -38,9 +43,15 @@ public class Compra implements Serializable {
 	@JoinColumn(name = "usuario_id")
 	private Usuario usuario;
 
+	@Enumerated(EnumType.STRING)
+	private StatusCompra status = StatusCompra.PENDING;
+
 	@ManyToOne
 	@JoinColumn(name = "endereco_id")
 	private Endereco enderecoDeEntrega;
+
+	@Column(name="is_deleted")
+	private Boolean deleted = false;
 
 	@Override
 	public int hashCode() {
@@ -105,6 +116,22 @@ public class Compra implements Serializable {
 
 	public void setEnderecoDeEntrega(Endereco enderecoDeEntrega) {
 		this.enderecoDeEntrega = enderecoDeEntrega;
+	}
+
+	public StatusCompra getStatus() {
+		return status;
+	}
+
+	public void setStatus(StatusCompra status) {
+		this.status = status;
+	}
+
+	public Boolean getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
 	}
 
 }

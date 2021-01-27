@@ -2,7 +2,9 @@ package com.emanuelhonorio.pogecommerce.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.constraints.NotBlank;
@@ -41,7 +43,7 @@ public class CreateProdutoDTO implements Serializable {
 
 	@NotNull
 	@Size(min = 1)
-	private Set<@URL String> fotos = new HashSet<>();
+	private List<@URL String> fotos = new ArrayList<>();
 
 	public Long getId() {
 		return id;
@@ -107,11 +109,11 @@ public class CreateProdutoDTO implements Serializable {
 		this.valorBase = valorBase;
 	}
 
-	public Set<String> getFotos() {
+	public List<String> getFotos() {
 		return fotos;
 	}
 
-	public void setFotos(Set<String> fotos) {
+	public void setFotos(List<String> fotos) {
 		this.fotos = fotos;
 	}
 

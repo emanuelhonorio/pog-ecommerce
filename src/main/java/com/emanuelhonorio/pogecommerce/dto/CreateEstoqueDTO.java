@@ -18,9 +18,11 @@ public class CreateEstoqueDTO implements Serializable {
 	@Positive
 	private Long produtoId;
 
+	@NotNull
 	@Positive
 	private Long tamanhoId;
 
+	@NotNull
 	@Positive
 	private Long corId;
 

@@ -3,7 +3,6 @@ package com.emanuelhonorio.pogecommerce.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import com.emanuelhonorio.pogecommerce.dto.EnderecoDTO;
 import com.emanuelhonorio.pogecommerce.error.exceptions.ResourceNotFoundException;
@@ -52,7 +51,7 @@ public class EnderecoService {
 	}
 
 	public void checkIfAdressBelongsToUserOrThrow(Endereco endereco, Usuario usuario) {
-		Assert.notNull(endereco.getUsuario().getId());
+		//Assert.notNull(endereco.getUsuario().getId());
 		if (endereco.getUsuario().getId() != usuario.getId()) {
 			throw new ResourceOwnerException("address doesn't belongs to user with id " + usuario.getId());
 		}

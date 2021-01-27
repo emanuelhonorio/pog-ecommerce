@@ -89,6 +89,8 @@ CREATE TABLE `compras` (
   `total` decimal(19,2) NOT NULL,
   `usuario_id` bigint(20) NOT NULL,
   `endereco_id` bigint(20) NOT NULL,
+  `is_deleted` tinyint(1) DEFAULT '0',
+  `status` enum('PENDING', 'CONFIRMED', 'IN_TRANSPORT', 'DELIVERED') DEFAULT 'PENDING' NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
   FOREIGN KEY (`endereco_id`) REFERENCES `enderecos` (`id`)
