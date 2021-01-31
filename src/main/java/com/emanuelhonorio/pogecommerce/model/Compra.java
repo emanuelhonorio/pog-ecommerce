@@ -2,6 +2,7 @@ package com.emanuelhonorio.pogecommerce.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,6 +17,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.OnDelete;
@@ -50,8 +53,31 @@ public class Compra implements Serializable {
 	@JoinColumn(name = "endereco_id")
 	private Endereco enderecoDeEntrega;
 
-	@Column(name="is_deleted")
+	@Column(name = "is_deleted")
 	private Boolean deleted = false;
+
+	@Column(name="created_at")
+	private LocalDateTime createdAt;
+
+	@Column(name="updated_at")
+	private LocalDateTime updatedAt;
+
+	@Column(name="deleted_at")
+	private LocalDateTime deletedAt;
+
+	@PrePersist
+	@PreUpdate
+	public void preSave() {
+
+		if (id == null) {
+			this.createdAt = LocalDateTime.now();
+		}
+		this.updatedAt = LocalDateTime.now();
+
+		if (deleted) {
+			this.deletedAt = LocalDateTime.now();
+		}
+	}
 
 	@Override
 	public int hashCode() {
@@ -132,6 +158,30 @@ public class Compra implements Serializable {
 
 	public void setDeleted(Boolean deleted) {
 		this.deleted = deleted;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public LocalDateTime getDeletedAt() {
+		return deletedAt;
+	}
+
+	public void setDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
 	}
 
 }

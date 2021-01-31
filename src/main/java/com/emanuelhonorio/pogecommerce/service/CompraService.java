@@ -1,9 +1,13 @@
 package com.emanuelhonorio.pogecommerce.service;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +21,7 @@ import com.emanuelhonorio.pogecommerce.model.Endereco;
 import com.emanuelhonorio.pogecommerce.model.Estoque;
 import com.emanuelhonorio.pogecommerce.model.ItemCompra;
 import com.emanuelhonorio.pogecommerce.model.Produto;
+import com.emanuelhonorio.pogecommerce.model.QCompra;
 import com.emanuelhonorio.pogecommerce.model.Tamanho;
 import com.emanuelhonorio.pogecommerce.model.Usuario;
 import com.emanuelhonorio.pogecommerce.model.enums.StatusCompra;
@@ -24,6 +29,8 @@ import com.emanuelhonorio.pogecommerce.repository.CompraRepository;
 import com.emanuelhonorio.pogecommerce.repository.CorRepository;
 import com.emanuelhonorio.pogecommerce.repository.EstoqueRepository;
 import com.emanuelhonorio.pogecommerce.repository.TamanhoRepository;
+import com.emanuelhonorio.pogecommerce.service.filter.CompraFilter;
+import com.querydsl.core.BooleanBuilder;
 
 @Transactional
 @Service
@@ -47,19 +54,21 @@ public class CompraService {
 	@Autowired
 	private TamanhoRepository tamanhoRepository;
 
-	private Cor findCorByIdOrThrow(Long id) {
-		return corRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Cor not found with id" + id));
-	}
-
-	private Tamanho findTamanhoByIdOrThrow(Long id) {
-		return tamanhoRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Tamanho not found with id" + id));
-	}
-
 	public Compra findByIdOrThrow(Long id) {
 		return this.compraRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Tamanho not found with id" + id));
+	}
+
+	public Page<Compra> filtrar(Usuario usuario, CompraFilter compraFilter, int page, int size) {
+		BooleanBuilder booleanBuilder = this.getBooleanBuilder(compraFilter, usuario);
+
+		return compraRepository.findAll(booleanBuilder, PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
+	}
+
+	public Page<Compra> filtrarAdmin(CompraFilter compraFilter, int page, int size) {
+		BooleanBuilder booleanBuilder = this.getBooleanBuilder(compraFilter, null);
+
+		return compraRepository.findAll(booleanBuilder, PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
 	}
 
 	public Compra comprar(Usuario usuario, CompraDTO compraDTO) {
@@ -129,14 +138,60 @@ public class CompraService {
 	public Compra atualizarStatus(Long id, StatusCompra status) {
 		Compra compra = this.findByIdOrThrow(id);
 		compra.setStatus(status);
-		
+
 		return compraRepository.save(compra);
 	}
 
 	public void safeDelete(Long id) {
 		Compra compra = this.findByIdOrThrow(id);
 		compra.setDeleted(true);
-		
+
 		compraRepository.save(compra);
+	}
+
+	private Cor findCorByIdOrThrow(Long id) {
+		return corRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Cor not found with id" + id));
+	}
+
+	private Tamanho findTamanhoByIdOrThrow(Long id) {
+		return tamanhoRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Tamanho not found with id" + id));
+	}
+
+	private BooleanBuilder getBooleanBuilder(CompraFilter compraFilter, Usuario usuario) {
+		BooleanBuilder booleanBuilder = new BooleanBuilder();
+
+		if (usuario != null) {
+			booleanBuilder.and(QCompra.compra.usuario.eq(usuario));
+		}
+
+		if (compraFilter.getId() != null) {
+			booleanBuilder.or(QCompra.compra.id.eq(compraFilter.getId()));
+		}
+
+		if (compraFilter.getEntregue() != null) {
+			if (compraFilter.getEntregue()) {
+				booleanBuilder.and(QCompra.compra.status.eq(StatusCompra.DELIVERED));				
+			} else {
+				booleanBuilder.and(QCompra.compra.status.ne(StatusCompra.DELIVERED));
+			}
+			
+		} 
+		
+		if (compraFilter.getStatus() != null) {
+			booleanBuilder.and(QCompra.compra.status.eq(compraFilter.getStatus()));
+		}
+
+		if (compraFilter.getData() != null) {
+			booleanBuilder.and(QCompra.compra.createdAt.between(compraFilter.getData().atStartOfDay(),
+					compraFilter.getData().atTime(LocalTime.MAX)));
+		}
+
+		if (compraFilter.getDeleted() != null) {
+			booleanBuilder.and(QCompra.compra.deleted.eq(compraFilter.getDeleted()));
+		}
+
+		return booleanBuilder;
 	}
 }
