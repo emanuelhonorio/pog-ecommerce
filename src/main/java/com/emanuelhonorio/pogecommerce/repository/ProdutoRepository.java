@@ -9,9 +9,6 @@ import com.emanuelhonorio.pogecommerce.model.Produto;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long>, QuerydslPredicateExecutor<Produto> {
 
-	boolean existsById(Long id);
-
 	Page<Produto> findAllByCategorias_Id(Long id, Pageable pageable);
 
-	Page<Produto> findAllByNomeIgnoreCaseContaining(String nome, Pageable pageable);
 }
