@@ -1,12 +1,14 @@
 package com.emanuelhonorio.pogecommerce.resource;
 
 import java.math.BigDecimal;
+import java.net.UnknownHostException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,11 +115,11 @@ public class StripeResource {
 	}
 
 	@PostMapping("/create-checkout-session")
-	public HashMap<String, String> createCheckoutSession(@RequestBody @Valid CompraDTO compraDTO, Principal principal)
-			throws StripeException {
+	public HashMap<String, String> createCheckoutSession(@RequestBody @Valid CompraDTO compraDTO, Principal principal, HttpServletRequest request)
+			throws StripeException, UnknownHostException {
 
 		Optional<Usuario> usuarioOpt = usuarioRepository.findByEmailIgnoreCase(principal.getName());
-		String myDomain = "http://localhost:4200";
+		String myDomain = request.getHeader("Origin");
 
 		Builder builder = SessionCreateParams.builder().addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
 				.setMode(SessionCreateParams.Mode.PAYMENT).setLocale(Locale.PT_BR)
