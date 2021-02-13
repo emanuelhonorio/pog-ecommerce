@@ -10,5 +10,6 @@ import com.emanuelhonorio.pogecommerce.model.Tamanho;
 
 public interface EstoqueRepository extends JpaRepository<Estoque, Long> {
 	Optional<Estoque> findByCorAndTamanho(Cor cor, Tamanho tamanho);
+	Optional<Estoque> findByCorNomeAndTamanhoNome(String cor, String tamanho);
 
 }

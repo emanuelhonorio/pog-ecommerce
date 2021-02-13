@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.emanuelhonorio.pogecommerce.model.Compra;
-import com.emanuelhonorio.pogecommerce.model.enums.StatusCompra;
+import com.emanuelhonorio.pogecommerce.model.enums.StatusCompraEnum;
 import com.emanuelhonorio.pogecommerce.service.CompraService;
 import com.emanuelhonorio.pogecommerce.service.filter.CompraFilter;
 
@@ -33,7 +33,7 @@ public class CompraResource {
 	}
 
 	@PutMapping("/{id}/status")
-	public void atualizarStatus(@PathVariable Long id, @RequestBody @NotNull @Valid StatusCompra status) {
+	public void atualizarStatus(@PathVariable Long id, @RequestBody @NotNull @Valid StatusCompraEnum status) {
 		this.compraService.atualizarStatus(id, status);
 	}
 

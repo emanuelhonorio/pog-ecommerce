@@ -55,7 +55,7 @@ public class MeResource {
 
 		Optional<Usuario> usuarioOpt = usuarioRepository.findByEmailIgnoreCase(currentPrincipalName);
 
-		return compraService.comprar(usuarioOpt.get(), compraDTO);
+		return compraService.comprar(usuarioOpt.get(), compraDTO, false);
 	}
 
 }

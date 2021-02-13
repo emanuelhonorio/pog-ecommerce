@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 import javax.validation.constraints.Positive;
 
-import com.emanuelhonorio.pogecommerce.model.enums.StatusCompra;
+import com.emanuelhonorio.pogecommerce.model.enums.StatusCompraEnum;
 
 public class CompraFilter implements Serializable {
 
@@ -14,7 +14,7 @@ public class CompraFilter implements Serializable {
 	@Positive
 	private Long id;
 
-	private StatusCompra status;
+	private StatusCompraEnum status;
 
 	private LocalDate data;
 
@@ -30,11 +30,11 @@ public class CompraFilter implements Serializable {
 		this.id = id;
 	}
 
-	public StatusCompra getStatus() {
+	public StatusCompraEnum getStatus() {
 		return status;
 	}
 
-	public void setStatus(StatusCompra status) {
+	public void setStatus(StatusCompraEnum status) {
 		this.status = status;
 	}
 

@@ -2,7 +2,9 @@ package com.emanuelhonorio.pogecommerce.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -58,7 +60,7 @@ public class Produto implements Serializable {
 
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	@OneToMany(mappedBy = "produto", cascade = CascadeType.ALL)
-	private Set<Foto> fotos = new HashSet<>();
+	private List<Foto> fotos = new ArrayList<>();
 
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	@OneToMany(mappedBy = "produto")
@@ -182,11 +184,11 @@ public class Produto implements Serializable {
 		this.estoques = estoques;
 	}
 
-	public Set<Foto> getFotos() {
+	public List<Foto> getFotos() {
 		return fotos;
 	}
 
-	public void setFotos(Set<Foto> fotos) {
+	public void setFotos(List<Foto> fotos) {
 		this.fotos = fotos;
 	}
 

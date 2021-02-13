@@ -2,6 +2,7 @@ package com.emanuelhonorio.pogecommerce.service;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import com.emanuelhonorio.pogecommerce.model.Produto;
 import com.emanuelhonorio.pogecommerce.model.QCompra;
 import com.emanuelhonorio.pogecommerce.model.Tamanho;
 import com.emanuelhonorio.pogecommerce.model.Usuario;
-import com.emanuelhonorio.pogecommerce.model.enums.StatusCompra;
+import com.emanuelhonorio.pogecommerce.model.enums.StatusCompraEnum;
 import com.emanuelhonorio.pogecommerce.repository.CompraRepository;
 import com.emanuelhonorio.pogecommerce.repository.CorRepository;
 import com.emanuelhonorio.pogecommerce.repository.EstoqueRepository;
@@ -71,14 +72,22 @@ public class CompraService {
 		return compraRepository.findAll(booleanBuilder, PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
 	}
 
-	public Compra comprar(Usuario usuario, CompraDTO compraDTO) {
+	public Compra comprar(Usuario usuario, CompraDTO compraDTO, boolean pending) {
 		Compra compra = new Compra();
 
 		Endereco endereco = enderecoService.findByIdOrThrow(compraDTO.getEnderecoId());
 
 		compra.setUsuario(usuario);
 		compra.setEnderecoDeEntrega(endereco);
-
+		compra.setTipoPagamento(compraDTO.getTipoPagamento());
+		compra.setTrocoPara(compraDTO.getTrocoPara());
+		
+		if (pending) {
+			compra.setStatus(StatusCompraEnum.PENDING);
+		} else {
+			compra.setStatus(StatusCompraEnum.DONE);
+		}
+		
 		Set<ItemCompraDTO> itens = compraDTO.getItens();
 
 		Estoque estoque = new Estoque();
@@ -134,8 +143,30 @@ public class CompraService {
 
 		return compra;
 	}
+	
+	public void cancelarCompra(Long compraId) {
+		Compra compra = findByIdOrThrow(compraId);
+		
+		for (ItemCompra item : compra.getItems()) {
+			
+			Optional<Estoque> estoqueOpt = estoqueRepository.findByCorNomeAndTamanhoNome(item.getNomeCor(), item.getNomeTamanho());
+			
+			// repoe estoque
+			if (estoqueOpt.isPresent()) {
+				
+				Estoque estoque = estoqueOpt.get();
+				
+				estoque.setQtdEstoque(estoque.getQtdEstoque() + item.getQuantidade());
 
-	public Compra atualizarStatus(Long id, StatusCompra status) {
+				estoqueRepository.save(estoque);
+			}
+			
+		}
+		
+		compraRepository.delete(compra);
+	}
+
+	public Compra atualizarStatus(Long id, StatusCompraEnum status) {
 		Compra compra = this.findByIdOrThrow(id);
 		compra.setStatus(status);
 
@@ -172,9 +203,9 @@ public class CompraService {
 
 		if (compraFilter.getEntregue() != null) {
 			if (compraFilter.getEntregue()) {
-				booleanBuilder.and(QCompra.compra.status.eq(StatusCompra.DELIVERED));				
+				booleanBuilder.and(QCompra.compra.status.eq(StatusCompraEnum.DELIVERED));				
 			} else {
-				booleanBuilder.and(QCompra.compra.status.ne(StatusCompra.DELIVERED));
+				booleanBuilder.and(QCompra.compra.status.ne(StatusCompraEnum.DELIVERED));
 			}
 			
 		} 

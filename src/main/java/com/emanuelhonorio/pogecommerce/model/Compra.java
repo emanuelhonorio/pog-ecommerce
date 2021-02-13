@@ -24,7 +24,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.emanuelhonorio.pogecommerce.model.enums.StatusCompra;
+import com.emanuelhonorio.pogecommerce.model.enums.StatusCompraEnum;
+import com.emanuelhonorio.pogecommerce.model.enums.TipoPagamentoEnum;
 
 @Entity
 @Table(name = "compras")
@@ -47,22 +48,29 @@ public class Compra implements Serializable {
 	private Usuario usuario;
 
 	@Enumerated(EnumType.STRING)
-	private StatusCompra status = StatusCompra.PENDING;
+	private StatusCompraEnum status = StatusCompraEnum.PENDING;
 
 	@ManyToOne
 	@JoinColumn(name = "endereco_id")
 	private Endereco enderecoDeEntrega;
 
+	@Column(name = "tipo_pagamento")
+	@Enumerated(EnumType.STRING)
+	private TipoPagamentoEnum tipoPagamento;
+
+	@Column(name = "troco_para")
+	private BigDecimal trocoPara;
+
 	@Column(name = "is_deleted")
 	private Boolean deleted = false;
 
-	@Column(name="created_at")
+	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
-	@Column(name="updated_at")
+	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 
-	@Column(name="deleted_at")
+	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
 	@PrePersist
@@ -144,11 +152,11 @@ public class Compra implements Serializable {
 		this.enderecoDeEntrega = enderecoDeEntrega;
 	}
 
-	public StatusCompra getStatus() {
+	public StatusCompraEnum getStatus() {
 		return status;
 	}
 
-	public void setStatus(StatusCompra status) {
+	public void setStatus(StatusCompraEnum status) {
 		this.status = status;
 	}
 
@@ -182,6 +190,22 @@ public class Compra implements Serializable {
 
 	public void setDeletedAt(LocalDateTime deletedAt) {
 		this.deletedAt = deletedAt;
+	}
+
+	public TipoPagamentoEnum getTipoPagamento() {
+		return tipoPagamento;
+	}
+
+	public void setTipoPagamento(TipoPagamentoEnum tipoPagamento) {
+		this.tipoPagamento = tipoPagamento;
+	}
+
+	public BigDecimal getTrocoPara() {
+		return trocoPara;
+	}
+
+	public void setTrocoPara(BigDecimal trocoPara) {
+		this.trocoPara = trocoPara;
 	}
 
 }
